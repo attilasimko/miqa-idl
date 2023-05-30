@@ -70,7 +70,7 @@ while True:
         plt.tight_layout()
         plt.savefig(str(saved_idx) + "/cor" + str(plot_idx) + ".png")
         plot_idx += 1
-    text += (str(last - first + 1) + ',')
+    text += (str(last - first - 1) + ',')
 
     first = np.min(np.argwhere(np.sum(segmentation, axis=(0, 2)) != 0))
     last = np.max(np.argwhere(np.sum(segmentation, axis=(0, 2)) != 0)) + 1
@@ -88,7 +88,7 @@ while True:
         plt.tight_layout()
         plt.savefig(str(saved_idx) + "/sag" + str(plot_idx) + ".png")
         plot_idx += 1
-    text += (str(last - first + 1) + ',')
+    text += (str(last - first - 1) + ',')
 
     first = np.min(np.argwhere(np.sum(segmentation, axis=(0, 1)) != 0))
     last = np.max(np.argwhere(np.sum(segmentation, axis=(0, 1)) != 0)) + 1
@@ -106,7 +106,7 @@ while True:
         plt.tight_layout()
         plt.savefig(str(saved_idx) + "/ax" + str(plot_idx) + ".png")
         plot_idx += 1
-    text += (str(last - first + 1) + '\n')
+    text += (str(last - first - 1) + '\n')
 
     pat_idx += 1
     saved_idx += 1
