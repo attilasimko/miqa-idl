@@ -16,13 +16,15 @@ while True:
     else:
         break
 
-N = 1
+N = 5
 data_path = "/mnt/f4616a95-e470-4c0f-a21e-a75a8d283b9e/RAW/MIQA"
 patients = os.listdir(data_path)
 # np.random.shuffle(patients)
 # patients = np.array(patients)[np.random.choice(len(patients), size=N, replace=False)]
 patients = sorted(patients)[800:800+N]
-    
+width = 30
+height = width / 2
+
 pat_idx = 0
 saved_idx = 0
 text = str(N) + '\n'
@@ -47,7 +49,6 @@ while True:
         continue
 
     selected_key = np.array(available_keys)[np.random.choice(len(available_keys), size=1, replace=False)][0]
-    selected_key = "Eye_AL"
     
     CT = patient_maps["CT"]
     segmentation = patient_maps[selected_key]
@@ -57,14 +58,16 @@ while True:
     last = np.max(np.argwhere(np.sum(segmentation, axis=(1, 2)) != 0)) + 1
     plot_idx = 0
     for i in range(first, last):
+        plt.figure(figsize=(width, height))
         plt.subplot(121)
-        plt.imshow(CT[i, :, :], vmin=0, vmax=255, cmap="gray")
+        plt.imshow(np.fliplr(np.flipud(np.transpose(CT[i, :, :]))), vmin=0, vmax=255, cmap="gray")
         plt.xticks([], [])
         plt.yticks([], [])
         plt.subplot(122)
-        plt.imshow(segmentation[i, :, :], vmin=0, vmax=1, cmap="gray")
+        plt.imshow(np.fliplr(np.flipud(np.transpose(segmentation[i, :, :]))), vmin=0, vmax=1, cmap="gray")
         plt.xticks([], [])
         plt.yticks([], [])
+        plt.tight_layout()
         plt.savefig(str(saved_idx) + "/cor" + str(plot_idx) + ".png")
         plot_idx += 1
     text += (str(last - first + 1) + ',')
@@ -73,14 +76,16 @@ while True:
     last = np.max(np.argwhere(np.sum(segmentation, axis=(0, 2)) != 0)) + 1
     plot_idx = 0
     for i in range(first, last):
+        plt.figure(figsize=(width, height))
         plt.subplot(121)
-        plt.imshow(CT[:, i, :], vmin=0, vmax=255, cmap="gray")
+        plt.imshow(np.flipud(np.transpose(CT[:, i, :])), vmin=0, vmax=255, cmap="gray")
         plt.xticks([], [])
         plt.yticks([], [])
         plt.subplot(122)
-        plt.imshow(segmentation[:, i, :], vmin=0, vmax=1, cmap="gray")
+        plt.imshow(np.flipud(np.transpose(segmentation[:, i, :])), vmin=0, vmax=1, cmap="gray")
         plt.xticks([], [])
         plt.yticks([], [])
+        plt.tight_layout()
         plt.savefig(str(saved_idx) + "/sag" + str(plot_idx) + ".png")
         plot_idx += 1
     text += (str(last - first + 1) + ',')
@@ -89,6 +94,7 @@ while True:
     last = np.max(np.argwhere(np.sum(segmentation, axis=(0, 1)) != 0)) + 1
     plot_idx = 0
     for i in range(first, last):
+        plt.figure(figsize=(width, height))
         plt.subplot(121)
         plt.imshow(CT[:, :, i], vmin=0, vmax=255, cmap="gray")
         plt.xticks([], [])
@@ -97,6 +103,7 @@ while True:
         plt.imshow(segmentation[:, :, i], vmin=0, vmax=1, cmap="gray")
         plt.xticks([], [])
         plt.yticks([], [])
+        plt.tight_layout()
         plt.savefig(str(saved_idx) + "/ax" + str(plot_idx) + ".png")
         plot_idx += 1
     text += (str(last - first + 1) + '\n')
