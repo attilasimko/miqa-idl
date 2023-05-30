@@ -58,15 +58,12 @@ while True:
     last = np.max(np.argwhere(np.sum(segmentation, axis=(1, 2)) != 0)) + 1
     plot_idx = 0
     for i in range(first, last):
-        plt.figure(figsize=(width, height))
-        plt.subplot(121)
-        plt.imshow(np.fliplr(np.flipud(np.transpose(CT[i, :, :]))), vmin=0, vmax=255, cmap="gray")
+        fig = plt.figure(figsize=(width, height), frameon=False)
+        im1 = plt.imshow(np.fliplr(np.flipud(np.transpose(CT[i, :, :]))), vmin=0, vmax=255, cmap="gray", interpolation='bilinear')
+        im2 = plt.imshow(np.fliplr(np.flipud(np.transpose(segmentation[i, :, :]))), vmin=0, vmax=2, cmap="gist_heat", alpha=.5, interpolation='nearest')
         plt.xticks([], [])
         plt.yticks([], [])
-        plt.subplot(122)
-        plt.imshow(np.fliplr(np.flipud(np.transpose(segmentation[i, :, :]))), vmin=0, vmax=1, cmap="gray")
-        plt.xticks([], [])
-        plt.yticks([], [])
+        plt.title(selected_key)
         plt.tight_layout()
         plt.savefig(str(saved_idx) + "/cor" + str(plot_idx) + ".png")
         plot_idx += 1
@@ -76,13 +73,9 @@ while True:
     last = np.max(np.argwhere(np.sum(segmentation, axis=(0, 2)) != 0)) + 1
     plot_idx = 0
     for i in range(first, last):
-        plt.figure(figsize=(width, height))
-        plt.subplot(121)
-        plt.imshow(np.flipud(np.transpose(CT[:, i, :])), vmin=0, vmax=255, cmap="gray")
-        plt.xticks([], [])
-        plt.yticks([], [])
-        plt.subplot(122)
-        plt.imshow(np.flipud(np.transpose(segmentation[:, i, :])), vmin=0, vmax=1, cmap="gray")
+        fig = plt.figure(figsize=(width, height), frameon=False)
+        im1 = plt.imshow(np.flipud(np.transpose(CT[:, i, :])), vmin=0, vmax=255, cmap="gray", interpolation='bilinear')
+        im2 = plt.imshow(np.flipud(np.transpose(segmentation[:, i, :])), vmin=0, vmax=2, cmap="gist_heat", alpha=.5, interpolation='nearest')
         plt.xticks([], [])
         plt.yticks([], [])
         plt.tight_layout()
@@ -94,19 +87,16 @@ while True:
     last = np.max(np.argwhere(np.sum(segmentation, axis=(0, 1)) != 0)) + 1
     plot_idx = 0
     for i in range(first, last):
-        plt.figure(figsize=(width, height))
-        plt.subplot(121)
-        plt.imshow(CT[:, :, i], vmin=0, vmax=255, cmap="gray")
-        plt.xticks([], [])
-        plt.yticks([], [])
-        plt.subplot(122)
-        plt.imshow(segmentation[:, :, i], vmin=0, vmax=1, cmap="gray")
+        fig = plt.figure(figsize=(width, height), frameon=False)
+        im1 = plt.imshow(CT[:, :, i], vmin=0, vmax=255, cmap="gray", interpolation='bilinear')
+        im2 = plt.imshow(segmentation[:, :, i], vmin=0, vmax=2, cmap="gist_heat", alpha=.5, interpolation='nearest')
         plt.xticks([], [])
         plt.yticks([], [])
         plt.tight_layout()
         plt.savefig(str(saved_idx) + "/ax" + str(plot_idx) + ".png")
         plot_idx += 1
-    text += (str(last - first - 1) + '\n')
+    text += (str(last - first - 1) + ',')
+    text += (selected_key + '\n')
 
     pat_idx += 1
     saved_idx += 1

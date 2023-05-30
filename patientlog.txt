@@ -1,6 +1,6 @@
 5
-9,16,7
-20,22,13
-6,20,5
-23,15,2
-3,4,2
+64,44,31,Cavity_Oral
+21,46,22,Glnd_Thyroid
+20,46,23,Glnd_Thyroid
+12,16,9,Esophagus
+14,16,8,Eye_PR
