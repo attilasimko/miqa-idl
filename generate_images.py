@@ -22,7 +22,7 @@ patients = os.listdir(data_path)
 # np.random.shuffle(patients)
 # patients = np.array(patients)[np.random.choice(len(patients), size=N, replace=False)]
 patients = sorted(patients)[800:800+N]
-width = 30
+width = 60
 height = width / 2
 
 pat_idx = 0
