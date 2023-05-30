@@ -1,0 +1,96 @@
+import sys
+sys.path.append("../miqa-seg")
+import os
+import numpy as np
+sys.path.insert(1, os.path.abspath('.'))
+import utils
+from utils import model_config
+import shutil
+import matplotlib.pyplot as plt
+
+idx = 0
+while True:
+    if (os.path.isdir(str(idx))):
+        shutil.rmtree(str(idx))
+        idx += 1
+    else:
+        break
+
+data_path = "/mnt/f4616a95-e470-4c0f-a21e-a75a8d283b9e/RAW/MIQA"
+patients = os.listdir(data_path)
+np.random.shuffle(patients)
+N = 10
+patients = np.array(patients)[np.random.choice(len(patients), size=N, replace=False)]
+    
+pat_idx = 0
+saved_idx = 0
+while True:
+    os.mkdir(str(idx))
+    patient = patients[pat_idx]
+    patient_maps, maps_count = utils.load_volume(data_path + "/" + patient)
+
+    available_keys = []
+    for key in patient_maps.keys():
+        if (len(patient_maps[key]) > 0):
+            if (np.sum(patient_maps[key]) > 0):
+                if ((key != "CT") and (key != "Background")):
+                    available_keys.append(key)
+    
+    if (len(available_keys) == 0):
+        pat_idx += 1
+        continue
+
+    selected_key = np.array(available_keys)[np.random.choice(len(available_keys), size=1, replace=False)][0]
+    
+    CT = patient_maps["CT"]
+    segmentation = patient_maps[selected_key]
+
+
+    first = np.min(np.argwhere(np.sum(segmentation, axis=(1, 2)) != 0))
+    last = np.max(np.argwhere(np.sum(segmentation, axis=(1, 2)) != 0)) + 1
+    plot_idx = 0
+    for i in range(first, last):
+        plt.subplot(121)
+        plt.imshow(CT[i, :, :], vmin=0, vmax=255, cmap="gray")
+        plt.xticks([], [])
+        plt.yticks([], [])
+        plt.subplot(122)
+        plt.imshow(segmentation[i, :, :], vmin=0, vmax=1, cmap="gray")
+        plt.xticks([], [])
+        plt.yticks([], [])
+        plt.savefig(str(saved_idx) + "/cor" + str(plot_idx) + ".png")
+        plot_idx += 1
+
+
+    first = np.min(np.argwhere(np.sum(segmentation, axis=(0, 2)) != 0))
+    last = np.max(np.argwhere(np.sum(segmentation, axis=(0, 2)) != 0)) + 1
+    plot_idx = 0
+    for i in range(first, last):
+        plt.subplot(121)
+        plt.imshow(CT[:, i, :], vmin=0, vmax=255, cmap="gray")
+        plt.xticks([], [])
+        plt.yticks([], [])
+        plt.subplot(122)
+        plt.imshow(segmentation[:, i, :], vmin=0, vmax=1, cmap="gray")
+        plt.xticks([], [])
+        plt.yticks([], [])
+        plt.savefig(str(saved_idx) + "/sag" + str(plot_idx) + ".png")
+        plot_idx += 1
+
+    first = np.min(np.argwhere(np.sum(segmentation, axis=(0, 1)) != 0))
+    last = np.max(np.argwhere(np.sum(segmentation, axis=(0, 1)) != 0)) + 1
+    plot_idx = 0
+    for i in range(first, last):
+        plt.subplot(121)
+        plt.imshow(CT[:, :, i], vmin=0, vmax=255, cmap="gray")
+        plt.xticks([], [])
+        plt.yticks([], [])
+        plt.subplot(122)
+        plt.imshow(segmentation[:, :, i], vmin=0, vmax=1, cmap="gray")
+        plt.xticks([], [])
+        plt.yticks([], [])
+        plt.savefig(str(saved_idx) + "/ax" + str(plot_idx) + ".png")
+        plot_idx += 1
+        
+    pat_idx += 1
+    saved_idx += 1
