@@ -1,6 +1,6 @@
 patient,label,model,coronal,sagittal,axial
-Breast_0f9f7935f91.npz,Vertebrae_T1,grumpy_couch_4240_hero,56,64,18
-Breast_0f9f7935f91.npz,GluteusMedius_R,grumpy_couch_4240_hero,85,91,106
-Breast_0f9f7935f91.npz,Tibia_R,grumpy_couch_4240_hero,228,227,174
-Breast_0f9f7935f91.npz,Vertebrae_T5,grumpy_couch_4240_hero,53,55,46
-Breast_0f9f7935f91.npz,Pharynx,grumpy_couch_4240_hero,436,486,174
+Pelvis_4ae0e4e33d6.npz,Autochthon_R,grumpy_couch_4240_hero,68,106,75
+Pelvis_4ae0e4e33d6.npz,GluteusMaximus_L,grumpy_couch_4240_hero,104,184,124
+Pelvis_4ae0e4e33d6.npz,Eye_Ant_R,grumpy_couch_4240_hero,226,362,169
+Pelvis_4ae0e4e33d6.npz,Duodenum,grumpy_couch_4240_hero,98,135,35
+Pelvis_4ae0e4e33d6.npz,Iliopsoas_L,grumpy_couch_4240_hero,140,127,142

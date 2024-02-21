@@ -1,6 +1,6 @@
 patient,label,model,coronal,sagittal,axial
-TotalSeg_s1301.npz,BrainStem,grumpy_couch_4240_hero,141,137,109
-TotalSeg_s1301.npz,Tibia_R,grumpy_couch_4240_hero,293,257,263
-TotalSeg_s1301.npz,FemoralHead_L,grumpy_couch_4240_hero,156,119,161
-TotalSeg_s1301.npz,MedullaOblongata,grumpy_couch_4240_hero,246,231,263
-TotalSeg_s1301.npz,Vertebrae_L6,grumpy_couch_4240_hero,122,124,48
+TotalSeg_s1338.npz,Kidney_L,grumpy_couch_4240_hero,218,165,57
+TotalSeg_s1338.npz,Hypothalamus_L,grumpy_couch_4240_hero,129,512,249
+TotalSeg_s1338.npz,Pharynx,grumpy_couch_4240_hero,512,512,249
+TotalSeg_s1338.npz,ParietalLobe_L,grumpy_couch_4240_hero,271,318,249
+ribseg_RibFrac103.npz,Humerus_L,grumpy_couch_4240_hero,129,72,66
