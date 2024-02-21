@@ -21,12 +21,9 @@ def getLargestCC(segmentation):
     return largestCC
 
 idx = 0
-while True:
-    if (os.path.isdir(str(idx))):
-        shutil.rmtree(str(idx))
-        idx += 1
-    else:
-        break
+for (root, dirs, files) in os.walk("refs/"):
+    for d in dirs:
+        shutil.rmtree("refs/" + d)
 
 data_path = "/mnt/f4616a95-e470-4c0f-a21e-a75a8d283b9e/RAW/MIQA"
 patients = os.listdir(data_path)
@@ -63,40 +60,23 @@ while ((pat_idx < len(patients))):
         patient = patients[pat_idx]
         patient_maps = load_volume(data_path + "/" + patient, labels)
         CT = np.clip(patient_maps["CT"] / 1000, -1, 1)
-        patient_pred = np.zeros((CT.shape), np.float32)
-        new_pred = np.zeros((CT.shape), np.int32)
-        for i in range(CT.shape[2]):
-            patient_pred[:, :, i] = np.argmax(base_model.predict(np.moveaxis(CT[:, :, i:i+1, np.newaxis], 2, 0), verbose=0)[0][0, :, :, :], -1)
-    
-        for idx in range(len(labels)):
-            largest_seg = getLargestCC(patient_pred == idx)
-            if (np.sum(largest_seg) > np.sum(patient_pred == idx) * 0.9):
-                new_pred += largest_seg * config.mapping[labels[idx]]
-        patient_pred = new_pred
 
         available_keys = []
-        for key in explore_labels:
-            if (len(patient_maps[key]) > 0):
-                continue
+        for selected_key in explore_labels:
+            if ((len(patient_maps[selected_key]) > 0) & (np.sum(patient_maps[selected_key]) > 0)):
+                explore_labels.remove(selected_key)
 
-            if (np.sum(patient_pred == config.mapping[key]) > min_voxels):
-                available_keys.append(key)
-
-        np.random.shuffle(available_keys)
-        available_keys = available_keys[:num_labels]
-        for selected_key in available_keys:
-            if (saved_idx < N):
-                if (not os.path.isdir(str(saved_idx))):
-                    os.mkdir(str(saved_idx))
+                if (not os.path.isdir('refs/' + str(selected_key))):
+                    os.mkdir('refs/' + str(selected_key))
                 text += (patient + ',')
                 text += (selected_key + ',')
 
                 segmentation = patient_maps[selected_key]
 
                 first = np.min(np.argwhere(np.sum(segmentation, axis=(1, 2)) != 0))
-                last = np.max(np.argwhere(np.sum(segmentation, axis=(1, 2)) != 0)) + 1
+                last = np.max(np.argwhere(np.sum(segmentation, axis=(1, 2)) != 0))
                 plot_idx = 0
-                for i in range(first, last):
+                for i in np.linspace(first, last, 20, dtype=int):
                     plot_ct.set_data(np.fliplr(np.flipud(np.transpose(CT[i, :, :]))))
                     plot_seg.set_data(np.fliplr(np.flipud(np.transpose(segmentation[i, :, :]))))
                     fig.savefig("refs/" + selected_key + "/cor" + str(plot_idx) + ".png")
@@ -104,9 +84,9 @@ while ((pat_idx < len(patients))):
                 text += (str(plot_idx) + ',')
 
                 first = np.min(np.argwhere(np.sum(segmentation, axis=(0, 2)) != 0))
-                last = np.max(np.argwhere(np.sum(segmentation, axis=(0, 2)) != 0)) + 1
+                last = np.max(np.argwhere(np.sum(segmentation, axis=(0, 2)) != 0))
                 plot_idx = 0
-                for i in range(first, last):
+                for i in np.linspace(first, last, 20, dtype=int):
                     plot_ct.set_data(np.flipud(np.transpose(CT[:, i, :])))
                     plot_seg.set_data(np.flipud(np.transpose(segmentation[:, i, :])))
                     fig.savefig("refs/" + selected_key + "/sag" + str(plot_idx) + ".png")
@@ -114,9 +94,9 @@ while ((pat_idx < len(patients))):
                 text += (str(plot_idx) + ',')
 
                 first = np.min(np.argwhere(np.sum(segmentation, axis=(0, 1)) != 0))
-                last = np.max(np.argwhere(np.sum(segmentation, axis=(0, 1)) != 0)) + 1
+                last = np.max(np.argwhere(np.sum(segmentation, axis=(0, 1)) != 0))
                 plot_idx = 0
-                for i in range(first, last):
+                for i in np.linspace(first, last, 20, dtype=int):
                     plot_ct.set_data(CT[:, :, i])
                     plot_seg.set_data(segmentation[:, :, i])
                     fig.savefig("refs/" + selected_key + "/ax" + str(plot_idx) + ".png")

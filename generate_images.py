@@ -6,6 +6,7 @@ sys.path.insert(1, os.path.abspath('.'))
 from utils import model_config, load_volume
 from model import OurNet
 import shutil
+import re
 import gc
 import matplotlib.pyplot as plt
 plt.ion()
@@ -19,6 +20,15 @@ def getLargestCC(segmentation):
     
     largestCC = labels == np.argmax(np.bincount(labels.flat)[1:])+1
     return largestCC
+
+def custom_sort(string):
+    
+    match = re.match(r'([^\d]+)(\d+)', string)
+    if match:
+        non_numeric, numeric = match.groups()
+        return (non_numeric, int(numeric))
+    else:
+        return (string, 0)
 
 idx = 0
 while True:
@@ -48,8 +58,8 @@ model_path = "/home/attilasimko/Documents/out/miqa/" + model_name + ".h5"
 model = "unet"
 labels = list(config.maps.keys())
 
-explore_labels = labels.copy()
-explore_labels.remove("Unknown")
+explore_labels = os.listdir("refs/")
+explore_labels = sorted(explore_labels, key=custom_sort)
 # explore_labels = ["Cochlea_L", "Cochlea_R", "Pituitary", "Arytenoid", "Chiasm", "OpticNerve_L", "OpticNerve_R", "Submandibular_L", "Submandibular_R"]
 
 # Build model
