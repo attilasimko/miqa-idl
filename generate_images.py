@@ -80,7 +80,7 @@ height = width / 2
 text_private = "patient,label,model,coronal,sagittal,axial\n"
 text_public = "patient,label,model,coronal,sagittal,axial\n"
 
-N = 5
+N = 15
 num_labels = 5
 min_voxels = 10
 pat_idx = 0
