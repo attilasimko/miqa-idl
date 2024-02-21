@@ -81,7 +81,7 @@ text_private = "patient,label,model,coronal,sagittal,axial\n"
 text_public = "patient,label,model,coronal,sagittal,axial\n"
 
 N = 15
-num_labels = 5
+# num_labels = 5
 min_voxels = 10
 pat_idx = 0
 saved_idx_private = 0
@@ -131,8 +131,6 @@ while (((saved_idx_private < N) | (saved_idx_public < N)) & (pat_idx < len(patie
             if (np.sum(patient_pred == config.mapping[key]) > min_voxels):
                 available_keys.append(key)
 
-        np.random.shuffle(available_keys)
-        available_keys = available_keys[:num_labels]
         for selected_key in available_keys:
             saved_idx = saved_idx_private if is_private else saved_idx_public
             if (saved_idx < N):
