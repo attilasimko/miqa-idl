@@ -9,6 +9,7 @@ import shutil
 import re
 import gc
 import matplotlib.pyplot as plt
+from matplotlib.colors import LinearSegmentedColormap
 plt.ion()
 import tensorflow
 from skimage.measure import label 
@@ -58,7 +59,9 @@ model_path = "/home/attilasimko/Documents/out/miqa/" + model_name + ".h5"
 model = "unet"
 labels = list(config.maps.keys())
 
-explore_labels = os.listdir("refs/")
+explore_labels = labels.copy()
+explore_labels.remove("Unknown")
+# explore_labels = os.listdir("refs/")
 explore_labels = sorted(explore_labels, key=custom_sort)
 # explore_labels = ["Cochlea_L", "Cochlea_R", "Pituitary", "Arytenoid", "Chiasm", "OpticNerve_L", "OpticNerve_R", "Submandibular_L", "Submandibular_R"]
 
@@ -87,10 +90,29 @@ pat_idx = 0
 saved_idx_private = 0
 saved_idx_public = 0
 
+cdict = {
+    'alpha': (
+        (0.0,  1.0, 1.0),
+        (1.0,  0.0, 0.0),
+    ),
+    'red': (
+        (0.0,  0.0, 0.0),
+        (1.0,  1.0, 1.0),
+    ),
+    'green': (
+        (0.0,  0.0, 0.0),
+        (1.0,  0.0, 0.0),
+    ),
+    'blue': (
+        (0.0,  0.0, 0.0),
+        (1.0,  0.0, 0.0),
+    )
+}
+red_cmap = LinearSegmentedColormap('BlueRed1', cdict)
 fig = plt.figure(figsize=(width, height), dpi=30, frameon=False)
 fig.tight_layout()
 plot_ct = plt.imshow(np.zeros((512, 512)), vmin=-1, vmax=1, cmap="gray", interpolation='bilinear')
-plot_seg = plt.imshow(np.zeros((512, 512)), vmin=0, vmax=2, cmap="gist_heat", alpha=.5, interpolation='nearest')
+plot_seg = plt.imshow(np.zeros((512, 512)), vmin=0, vmax=2, cmap=red_cmap, alpha=.5, interpolation='nearest')
 title = plt.title('')
 plt.xticks([], [])
 plt.yticks([], [])

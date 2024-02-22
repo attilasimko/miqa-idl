@@ -8,6 +8,7 @@ from model import OurNet
 import shutil
 import gc
 import matplotlib.pyplot as plt
+from matplotlib.colors import LinearSegmentedColormap
 plt.ion()
 import tensorflow
 from skimage.measure import label 
@@ -39,22 +40,35 @@ explore_labels.remove("Unknown")
 
 width = 12
 height = width / 2
-text = "patient,label,model,coronal,sagittal,axial\n"
 
-N = 500
-num_labels = 10
-min_voxels = 50
 pat_idx = 0
-saved_idx = 0
 
+cdict = {
+    'alpha': (
+        (0.0,  1.0, 1.0),
+        (1.0,  0.0, 0.0),
+    ),
+    'red': (
+        (0.0,  0.0, 0.0),
+        (1.0,  0.0, 0.0),
+    ),
+    'green': (
+        (0.0,  0.0, 0.0),
+        (1.0,  1.0, 1.0),
+    ),
+    'blue': (
+        (0.0,  0.0, 0.0),
+        (1.0,  0.0, 0.0),
+    )
+}
+green_cmap = LinearSegmentedColormap('BlueRed1', cdict)
 fig = plt.figure(figsize=(width, height), dpi=30, frameon=False)
 fig.tight_layout()
 plot_ct = plt.imshow(np.zeros((512, 512)), vmin=-1, vmax=1, cmap="gray", interpolation='bilinear')
-plot_seg = plt.imshow(np.zeros((512, 512)), vmin=0, vmax=2, cmap="gist_heat", alpha=.5, interpolation='nearest')
+plot_seg = plt.imshow(np.zeros((512, 512)), vmin=0, vmax=2, cmap=green_cmap, alpha=.5, interpolation='nearest')
 title = plt.title('')
 plt.xticks([], [])
 plt.yticks([], [])
-
 while ((pat_idx < len(patients))):
     try:
         patient = patients[pat_idx]
@@ -68,8 +82,6 @@ while ((pat_idx < len(patients))):
 
                 if (not os.path.isdir('refs/' + str(selected_key))):
                     os.mkdir('refs/' + str(selected_key))
-                text += (patient + ',')
-                text += (selected_key + ',')
 
                 segmentation = patient_maps[selected_key]
 
@@ -81,7 +93,6 @@ while ((pat_idx < len(patients))):
                     plot_seg.set_data(np.fliplr(np.flipud(np.transpose(segmentation[i, :, :]))))
                     fig.savefig("refs/" + selected_key + "/cor" + str(plot_idx) + ".png")
                     plot_idx += 1
-                text += (str(plot_idx) + ',')
 
                 first = np.min(np.argwhere(np.sum(segmentation, axis=(0, 2)) != 0))
                 last = np.max(np.argwhere(np.sum(segmentation, axis=(0, 2)) != 0))
@@ -91,7 +102,6 @@ while ((pat_idx < len(patients))):
                     plot_seg.set_data(np.flipud(np.transpose(segmentation[:, i, :])))
                     fig.savefig("refs/" + selected_key + "/sag" + str(plot_idx) + ".png")
                     plot_idx += 1
-                text += (str(plot_idx) + ',')
 
                 first = np.min(np.argwhere(np.sum(segmentation, axis=(0, 1)) != 0))
                 last = np.max(np.argwhere(np.sum(segmentation, axis=(0, 1)) != 0))
@@ -101,14 +111,9 @@ while ((pat_idx < len(patients))):
                     plot_seg.set_data(segmentation[:, :, i])
                     fig.savefig("refs/" + selected_key + "/ax" + str(plot_idx) + ".png")
                     plot_idx += 1
-                text += (str(plot_idx) + '\n')
 
-                saved_idx += 1
                 gc.collect()
     except Exception as e:
         print(e)
     
     pat_idx += 1
-
-with open('reflog.txt', 'w') as f:
-    f.write(text)
