@@ -59,11 +59,55 @@ model_path = "/home/attilasimko/Documents/out/miqa/" + model_name + ".h5"
 model = "unet"
 labels = list(config.maps.keys())
 
-explore_labels = labels.copy()
-explore_labels.remove("Unknown")
+# explore_labels = labels.copy()
+# explore_labels.remove("Unknown")
 # explore_labels = os.listdir("refs/")
+explore_labels = ["Cochlea_R",
+"Pituitary",
+"Arytenoid",
+"Chiasm",
+"Vertebrae_L6",
+"OpticNerve_L",
+"Cochlea_L",
+"Vertebrae_C5",
+"Vertebrae_C4",
+"Vertebrae_C6",
+"Vertebrae_C3",
+"OpticNerve_R",
+"Vertebrae_T5",
+"Vertebrae_C7",
+"Vertebrae_C1",
+"Vertebrae_T4",
+"Vertebrae_T7",
+"Vertebrae_T8",
+"Vertebrae_T10",
+"Submandibular_L",
+"Vertebrae_C2",
+"Vertebrae_T6",
+"Vertebrae_T3",
+"Submandibular_R",
+"Vertebrae_T1",
+"Vertebrae_T9",
+"Vertebrae_T11",
+"LacrimalGland_R",
+"Vertebrae_T2",
+"Vertebrae_L1",
+"Vertebrae_T12",
+"Vertebrae_L2",
+"Cricopharyngeus",
+"LacrimalGland_L",
+"Eye_Ant_R",
+"BuccalMucosa",
+"Vertebrae_L3",
+"Vertebrae_L4",
+"A_Carotid_L",
+"A_Carotid_R",
+"Portal_Vein",
+"Eye_Ant_L",
+"Thyroid",
+"Vertebrae_L5",
+"Duodenum"]
 explore_labels = sorted(explore_labels, key=custom_sort)
-# explore_labels = ["Cochlea_L", "Cochlea_R", "Pituitary", "Arytenoid", "Chiasm", "OpticNerve_L", "OpticNerve_R", "Submandibular_L", "Submandibular_R"]
 
 # Build model
 network = OurNet()
@@ -83,7 +127,7 @@ height = width / 2
 text_private = "patient,label,model,coronal,sagittal,axial\n"
 text_public = "patient,label,model,coronal,sagittal,axial\n"
 
-N = 100
+N = 200
 # num_labels = 5
 min_voxels = 10
 pat_idx = 0
