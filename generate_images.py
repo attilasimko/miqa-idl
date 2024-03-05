@@ -4,7 +4,7 @@ import os
 import numpy as np
 sys.path.insert(1, os.path.abspath('.'))
 from utils import model_config, load_volume
-from model import OurNet
+from model import build_unet
 import shutil
 import re
 import gc
@@ -110,15 +110,8 @@ explore_labels = ["Cochlea_R",
 explore_labels = sorted(explore_labels, key=custom_sort)
 
 # Build model
-network = OurNet()
-if (model == "nnformer"):
-    num_filters = 48
-    base_model = network.build_nnformer(len(config.labels), 1, num_filters, 0.0, 0.0, 0.0)
-elif (model == "unet"):
-    num_filters = 48
-    base_model = network.build_unet(len(config.labels), 1, num_filters, 0.0, config.epsilon, 0.0)
-else:
-    raise ValueError("Model not recognized.")
+num_filters = 48
+base_model = build_unet(len(config.labels), 1, num_filters, 0.0, config.epsilon)
 base_model.load_weights(model_path)
 base_model.compile(loss="mse")
 
@@ -129,6 +122,7 @@ text_public = "patient,label,model,coronal,sagittal,axial\n"
 
 N = 200
 # num_labels = 5
+num_slices = 30
 min_voxels = 10
 pat_idx = 0
 saved_idx_private = 0
@@ -209,9 +203,9 @@ while (((saved_idx_private < N) | (saved_idx_public < N)) & (pat_idx < len(patie
                 segmentation = patient_pred == config.mapping[selected_key]
 
                 first = np.min(np.argwhere(np.sum(segmentation, axis=(1, 2)) != 0))
-                last = np.max(np.argwhere(np.sum(segmentation, axis=(1, 2)) != 0)) + 1
+                last = np.max(np.argwhere(np.sum(segmentation, axis=(1, 2)) != 0))
                 plot_idx = 0
-                for i in range(first, last):
+                for i in np.linspace(first, last, num_slices, dtype=int):
                     plot_ct.set_data(np.fliplr(np.flipud(np.transpose(CT[i, :, :]))))
                     plot_seg.set_data(np.fliplr(np.flipud(np.transpose(segmentation[i, :, :]))))
                     fig.savefig(save_path + str(saved_idx) + "/cor" + str(plot_idx) + ".png")
@@ -219,9 +213,9 @@ while (((saved_idx_private < N) | (saved_idx_public < N)) & (pat_idx < len(patie
                 line += (str(plot_idx) + ',')
 
                 first = np.min(np.argwhere(np.sum(segmentation, axis=(0, 2)) != 0))
-                last = np.max(np.argwhere(np.sum(segmentation, axis=(0, 2)) != 0)) + 1
+                last = np.max(np.argwhere(np.sum(segmentation, axis=(0, 2)) != 0))
                 plot_idx = 0
-                for i in range(first, last):
+                for i in np.linspace(first, last, num_slices, dtype=int):
                     plot_ct.set_data(np.flipud(np.transpose(CT[:, i, :])))
                     plot_seg.set_data(np.flipud(np.transpose(segmentation[:, i, :])))
                     fig.savefig(save_path + str(saved_idx) + "/sag" + str(plot_idx) + ".png")
@@ -229,9 +223,9 @@ while (((saved_idx_private < N) | (saved_idx_public < N)) & (pat_idx < len(patie
                 line += (str(plot_idx) + ',')
 
                 first = np.min(np.argwhere(np.sum(segmentation, axis=(0, 1)) != 0))
-                last = np.max(np.argwhere(np.sum(segmentation, axis=(0, 1)) != 0)) + 1
+                last = np.max(np.argwhere(np.sum(segmentation, axis=(0, 1)) != 0))
                 plot_idx = 0
-                for i in range(first, last):
+                for i in np.linspace(first, last, num_slices, dtype=int):
                     plot_ct.set_data(CT[:, :, i])
                     plot_seg.set_data(segmentation[:, :, i])
                     fig.savefig(save_path + str(saved_idx) + "/ax" + str(plot_idx) + ".png")
