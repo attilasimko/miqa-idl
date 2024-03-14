@@ -38,6 +38,7 @@ while True:
         idx += 1
     else:
         break
+
 while True:
     if (os.path.isdir("public/" + str(idx))):
         shutil.rmtree("public/" + str(idx))
@@ -62,50 +63,26 @@ labels = list(config.maps.keys())
 # explore_labels = labels.copy()
 # explore_labels.remove("Unknown")
 # explore_labels = os.listdir("refs/")
-explore_labels = ["Cochlea_R",
+explore_labels = [
+"Cochlea_L",
+"Cochlea_R",
 "Pituitary",
 "Arytenoid",
 "Chiasm",
-"Vertebrae_L6",
 "OpticNerve_L",
-"Cochlea_L",
-"Vertebrae_C5",
-"Vertebrae_C4",
-"Vertebrae_C6",
-"Vertebrae_C3",
 "OpticNerve_R",
-"Vertebrae_T5",
-"Vertebrae_C7",
-"Vertebrae_C1",
-"Vertebrae_T4",
-"Vertebrae_T7",
-"Vertebrae_T8",
-"Vertebrae_T10",
 "Submandibular_L",
-"Vertebrae_C2",
-"Vertebrae_T6",
-"Vertebrae_T3",
 "Submandibular_R",
-"Vertebrae_T1",
-"Vertebrae_T9",
-"Vertebrae_T11",
-"LacrimalGland_R",
-"Vertebrae_T2",
-"Vertebrae_L1",
-"Vertebrae_T12",
-"Vertebrae_L2",
-"Cricopharyngeus",
 "LacrimalGland_L",
+"LacrimalGland_R",
+"Cricopharyngeus",
+"Eye_Ant_L",
 "Eye_Ant_R",
 "BuccalMucosa",
-"Vertebrae_L3",
-"Vertebrae_L4",
 "A_Carotid_L",
 "A_Carotid_R",
 "Portal_Vein",
-"Eye_Ant_L",
 "Thyroid",
-"Vertebrae_L5",
 "Duodenum"]
 explore_labels = sorted(explore_labels, key=custom_sort)
 
@@ -115,15 +92,16 @@ base_model = build_unet(len(config.labels), 1, num_filters, 0.0, config.epsilon)
 base_model.load_weights(model_path)
 base_model.compile(loss="mse")
 
-width = 12
+width = 18
 height = width / 2
 text_private = "patient,label,model,coronal,sagittal,axial\n"
 text_public = "patient,label,model,coronal,sagittal,axial\n"
 
-N = 200
+N = np.Infinity
 # num_labels = 5
 num_slices = 30
 min_voxels = 10
+largest_ratio = 0.5
 pat_idx = 0
 saved_idx_private = 0
 saved_idx_public = 0
@@ -158,7 +136,7 @@ plt.yticks([], [])
 while (((saved_idx_private < N) | (saved_idx_public < N)) & (pat_idx < len(patients))):
     try:
         patient = patients[pat_idx]
-        if (("Pelvis" in patient) | ("Breast" in patient)):
+        if (("Pelvis" in patient) | ("Breast" in patient) | ("MIQA" in patient)):
             save_path = "private/"
             is_private = True
         else:
@@ -179,7 +157,7 @@ while (((saved_idx_private < N) | (saved_idx_public < N)) & (pat_idx < len(patie
     
         for idx in range(len(labels)):
             largest_seg = getLargestCC(patient_pred == idx)
-            if (np.sum(largest_seg) > np.sum(patient_pred == idx) * 0.9):
+            if (np.sum(largest_seg) > np.sum(patient_pred == idx) * largest_ratio):
                 new_pred += largest_seg * config.mapping[labels[idx]]
         patient_pred = new_pred
 
