@@ -29,7 +29,7 @@ for (root, dirs, files) in os.walk("refs/"):
 data_path = "/mnt/f4616a95-e470-4c0f-a21e-a75a8d283b9e/RAW/MIQA"
 patients = os.listdir(data_path)
 # Trim private data
-patients = [patient for patient in patients if ("Pelvis" not in patient) & ("Breast" not in patient)]
+patients = [patient for patient in patients if ("MIQA" not in patient)]
 np.random.shuffle(patients)
 
 config = model_config("../miqa-seg/data_evaluation/PatientLabelProcessed.csv")
@@ -91,7 +91,7 @@ while ((pat_idx < len(patients))):
                 for i in np.linspace(first, last, 20, dtype=int):
                     plot_ct.set_data(np.fliplr(np.flipud(np.transpose(CT[i, :, :]))))
                     plot_seg.set_data(np.fliplr(np.flipud(np.transpose(segmentation[i, :, :]))))
-                    fig.savefig("refs/" + selected_key + "/cor" + str(plot_idx) + ".png")
+                    fig.savefig("refs/" + selected_key + "/cor" + str(plot_idx) + ".jpg")
                     plot_idx += 1
 
                 first = np.min(np.argwhere(np.sum(segmentation, axis=(0, 2)) != 0))
@@ -100,7 +100,7 @@ while ((pat_idx < len(patients))):
                 for i in np.linspace(first, last, 20, dtype=int):
                     plot_ct.set_data(np.flipud(np.transpose(CT[:, i, :])))
                     plot_seg.set_data(np.flipud(np.transpose(segmentation[:, i, :])))
-                    fig.savefig("refs/" + selected_key + "/sag" + str(plot_idx) + ".png")
+                    fig.savefig("refs/" + selected_key + "/sag" + str(plot_idx) + ".jpg")
                     plot_idx += 1
 
                 first = np.min(np.argwhere(np.sum(segmentation, axis=(0, 1)) != 0))
@@ -109,7 +109,7 @@ while ((pat_idx < len(patients))):
                 for i in np.linspace(first, last, 20, dtype=int):
                     plot_ct.set_data(CT[:, :, i])
                     plot_seg.set_data(segmentation[:, :, i])
-                    fig.savefig("refs/" + selected_key + "/ax" + str(plot_idx) + ".png")
+                    fig.savefig("refs/" + selected_key + "/ax" + str(plot_idx) + ".jpg")
                     plot_idx += 1
 
                 gc.collect()

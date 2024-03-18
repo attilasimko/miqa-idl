@@ -3,7 +3,7 @@ sys.path.append("../miqa-seg")
 import os
 import numpy as np
 sys.path.insert(1, os.path.abspath('.'))
-from utils import model_config, load_volume
+from utils import model_config, load_volume, full_body_pred
 from model import build_unet
 import shutil
 import re
@@ -12,15 +12,6 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 plt.ion()
 import tensorflow
-from skimage.measure import label 
-
-def getLargestCC(segmentation):
-    labels = label(segmentation)
-    if (labels.max() == 0):
-        return np.zeros(segmentation.shape, np.int32)
-    
-    largestCC = labels == np.argmax(np.bincount(labels.flat)[1:])+1
-    return largestCC
 
 def custom_sort(string):
     
@@ -62,34 +53,33 @@ labels = list(config.maps.keys())
 
 # explore_labels = labels.copy()
 # explore_labels.remove("Unknown")
-# explore_labels = os.listdir("refs/")
-explore_labels = [
-"Cochlea_L",
-"Cochlea_R",
-"Pituitary",
-"Arytenoid",
-"Chiasm",
-"OpticNerve_L",
-"OpticNerve_R",
-"Submandibular_L",
-"Submandibular_R",
-"LacrimalGland_L",
-"LacrimalGland_R",
-"Cricopharyngeus",
-"Eye_Ant_L",
-"Eye_Ant_R",
-"BuccalMucosa",
-"A_Carotid_L",
-"A_Carotid_R",
-"Portal_Vein",
-"Thyroid",
-"Duodenum"]
+explore_labels = os.listdir("refs/")
+# explore_labels = [
+# "Cochlea_L",
+# "Cochlea_R",
+# "Pituitary",
+# "Arytenoid",
+# "Chiasm",
+# "OpticNerve_L",
+# "OpticNerve_R",
+# "Submandibular_L",
+# "Submandibular_R",
+# "LacrimalGland_L",
+# "LacrimalGland_R",
+# "Cricopharyngeus",
+# "Eye_Ant_L",
+# "Eye_Ant_R",
+# "A_Carotid_L",
+# "A_Carotid_R",
+# "Portal_Vein",
+# "Thyroid",
+# "Duodenum"]
 explore_labels = sorted(explore_labels, key=custom_sort)
 
 # Build model
 num_filters = 48
 base_model = build_unet(len(config.labels), 1, num_filters, 0.0, config.epsilon)
-base_model.load_weights(model_path)
+base_model.load_weights(model_path, skip_mismatch=True, by_name=True)
 base_model.compile(loss="mse")
 
 width = 18
@@ -97,11 +87,10 @@ height = width / 2
 text_private = "patient,label,model,coronal,sagittal,axial\n"
 text_public = "patient,label,model,coronal,sagittal,axial\n"
 
-N = np.Infinity
+N = 5 # np.Infinity
 # num_labels = 5
 num_slices = 30
 min_voxels = 10
-largest_ratio = 0.5
 pat_idx = 0
 saved_idx_private = 0
 saved_idx_public = 0
@@ -150,16 +139,7 @@ while (((saved_idx_private < N) | (saved_idx_public < N)) & (pat_idx < len(patie
 
         patient_maps = load_volume(data_path + "/" + patient, labels)
         CT = np.clip(patient_maps["CT"] / 1000, -1, 1)
-        patient_pred = np.zeros((CT.shape), np.float32)
-        new_pred = np.zeros((CT.shape), np.int32)
-        for i in range(CT.shape[2]):
-            patient_pred[:, :, i] = np.argmax(base_model.predict(np.moveaxis(CT[:, :, i:i+1, np.newaxis], 2, 0), verbose=0)[0][0, :, :, :], -1)
-    
-        for idx in range(len(labels)):
-            largest_seg = getLargestCC(patient_pred == idx)
-            if (np.sum(largest_seg) > np.sum(patient_pred == idx) * largest_ratio):
-                new_pred += largest_seg * config.mapping[labels[idx]]
-        patient_pred = new_pred
+        patient_pred = full_body_pred(base_model, config, CT)[0]
 
         available_keys = []
         for key in explore_labels:
@@ -186,7 +166,7 @@ while (((saved_idx_private < N) | (saved_idx_public < N)) & (pat_idx < len(patie
                 for i in np.linspace(first, last, num_slices, dtype=int):
                     plot_ct.set_data(np.fliplr(np.flipud(np.transpose(CT[i, :, :]))))
                     plot_seg.set_data(np.fliplr(np.flipud(np.transpose(segmentation[i, :, :]))))
-                    fig.savefig(save_path + str(saved_idx) + "/cor" + str(plot_idx) + ".png")
+                    fig.savefig(save_path + str(saved_idx) + "/cor" + str(plot_idx) + ".jpg")
                     plot_idx += 1
                 line += (str(plot_idx) + ',')
 
@@ -196,7 +176,7 @@ while (((saved_idx_private < N) | (saved_idx_public < N)) & (pat_idx < len(patie
                 for i in np.linspace(first, last, num_slices, dtype=int):
                     plot_ct.set_data(np.flipud(np.transpose(CT[:, i, :])))
                     plot_seg.set_data(np.flipud(np.transpose(segmentation[:, i, :])))
-                    fig.savefig(save_path + str(saved_idx) + "/sag" + str(plot_idx) + ".png")
+                    fig.savefig(save_path + str(saved_idx) + "/sag" + str(plot_idx) + ".jpg")
                     plot_idx += 1
                 line += (str(plot_idx) + ',')
 
@@ -206,7 +186,7 @@ while (((saved_idx_private < N) | (saved_idx_public < N)) & (pat_idx < len(patie
                 for i in np.linspace(first, last, num_slices, dtype=int):
                     plot_ct.set_data(CT[:, :, i])
                     plot_seg.set_data(segmentation[:, :, i])
-                    fig.savefig(save_path + str(saved_idx) + "/ax" + str(plot_idx) + ".png")
+                    fig.savefig(save_path + str(saved_idx) + "/ax" + str(plot_idx) + ".jpg")
                     plot_idx += 1
                 line += (str(plot_idx) + '\n')
 
